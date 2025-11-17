@@ -33,7 +33,7 @@ static int extend_table(void)
                                                           new_size * sizeof(stack_entry_t));
     if (!new_entries)
     {
-        return 0; // Ошибка выделения памяти
+        return 0; // Возможна ошибка выделения памяти (На будующее)
     }
 
     // Инициализация новых записей как свободных
