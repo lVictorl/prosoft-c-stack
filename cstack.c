@@ -104,3 +104,55 @@ unsigned int stack_size(const hstack_t stack)
     }
     return count;
 }
+
+// Добавление элемента в стек
+void stack_push(const hstack_t stack, const void *data_in, const unsigned int size)
+{
+    // Проверка валидности параметров
+    if (stack_valid_handler(stack) || data_in == NULL || size == 0)
+    {
+        return;
+    }
+
+    // Выделение памяти для узла и данных в одном блоке
+    node_t *new_node = (node_t *)malloc(sizeof(node_t) + size);
+    if (!new_node)
+    {
+        return; // Ошибка выделения памяти
+    }
+
+    // Инициализация нового узла
+    new_node->prev = g_table.entries[stack].stack;
+    new_node->size = size;
+    memcpy(new_node->data, data_in, size);
+
+    // Обновление вершины стека
+    g_table.entries[stack].stack = new_node;
+}
+
+// Извлечение элемента из стека
+unsigned int stack_pop(const hstack_t stack, void *data_out, const unsigned int size)
+{
+    // Проверка возможности извлечения
+    if (stack_valid_handler(stack) || g_table.entries[stack].stack == NULL)
+    {
+        return 0;
+    }
+
+    node_t *top = g_table.entries[stack].stack;
+
+    // Определение размера копируемых данных (минимум из доступного и запрошенного)
+    unsigned int copy_size = (size < top->size) ? size : top->size;
+
+    // Копирование данных в буфер, если он предоставлен
+    if (data_out != NULL && copy_size > 0)
+    {
+        memcpy(data_out, top->data, copy_size);
+    }
+
+    // Обновление вершины стека и освобождение памяти
+    g_table.entries[stack].stack = top->prev;
+    free(top);
+
+    return copy_size;
+}
