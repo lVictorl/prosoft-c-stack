@@ -23,3 +23,54 @@ static struct
     unsigned int size;      // Текущий размер таблицы
     stack_entry_t *entries; // Динамический массив записей
 } g_table = {0, NULL};
+
+// Вспомогательная функция для расширения таблицы стеков
+static int extend_table(void)
+{
+    // Определяем новый размер таблицы: начальный размер 10, затем удвоение
+    unsigned int new_size = g_table.size == 0 ? 10 : g_table.size * 2;
+    stack_entry_t *new_entries = (stack_entry_t *)realloc(g_table.entries,
+                                                          new_size * sizeof(stack_entry_t));
+    if (!new_entries)
+    {
+        return 0; // Ошибка выделения памяти
+    }
+
+    // Инициализация новых записей как свободных
+    for (unsigned int i = g_table.size; i < new_size; i++)
+    {
+        new_entries[i].reserved = 0;
+        new_entries[i].stack = NULL;
+    }
+
+    g_table.entries = new_entries;
+    g_table.size = new_size;
+    return 1;
+}
+
+// Создание нового стека
+hstack_t stack_new(void)
+{
+    // Поиск первого свободного слота в таблице
+    for (unsigned int i = 0; i < g_table.size; i++)
+    {
+        if (!g_table.entries[i].reserved)
+        {
+            g_table.entries[i].reserved = 1;
+            g_table.entries[i].stack = NULL;
+            return (hstack_t)i;
+        }
+    }
+
+    // Если свободных слотов нет - расширяем таблицу
+    if (!extend_table())
+    {
+        return -1; // Ошибка расширения таблицы
+    }
+
+    // Используем последний созданный слот
+    unsigned int new_index = g_table.size - 1;
+    g_table.entries[new_index].reserved = 1;
+    g_table.entries[new_index].stack = NULL;
+    return (hstack_t)new_index;
+}
