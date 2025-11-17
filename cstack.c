@@ -156,3 +156,25 @@ unsigned int stack_pop(const hstack_t stack, void *data_out, const unsigned int 
 
     return copy_size;
 }
+
+// Освобождение стека и связанной с ним памяти
+void stack_free(const hstack_t stack)
+{
+    if (stack_valid_handler(stack))
+    {
+        return; // Некорректный хэндлер
+    }
+
+    // Последовательное освобождение всех узлов стека
+    node_t *current = g_table.entries[stack].stack;
+    while (current != NULL)
+    {
+        node_t *prev = current->prev;
+        free(current);
+        current = prev;
+    }
+
+    // Помечаем слот как свободный
+    g_table.entries[stack].reserved = 0;
+    g_table.entries[stack].stack = NULL;
+}
