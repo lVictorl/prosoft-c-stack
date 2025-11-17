@@ -74,3 +74,33 @@ hstack_t stack_new(void)
     g_table.entries[new_index].stack = NULL;
     return (hstack_t)new_index;
 }
+
+// Проверка валидности хэндлера стека
+int stack_valid_handler(const hstack_t stack)
+{
+    // Хэндлер должен быть в пределах таблицы и слот должен быть занят
+    if (stack < 0 || (unsigned int)stack >= g_table.size)
+    {
+        return 1;
+    }
+    return !g_table.entries[stack].reserved;
+}
+
+// Получение количества элементов в стеке
+unsigned int stack_size(const hstack_t stack)
+{
+    if (stack_valid_handler(stack))
+    {
+        return 0;
+    }
+
+    // Линейный подсчет элементов обходом от вершины
+    unsigned int count = 0;
+    node_t *current = g_table.entries[stack].stack;
+    while (current != NULL)
+    {
+        count++;
+        current = current->prev;
+    }
+    return count;
+}
