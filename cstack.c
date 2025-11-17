@@ -1,42 +1,25 @@
 #include "cstack.h"
-#include <stddef.h>
+#include <stdlib.h>
+#include <string.h>
 
-#define UNUSED(VAR) (void)(VAR)
-
-hstack_t stack_new(void)
+// Узел стека с гибким массивом для данных
+typedef struct node_s
 {
-    return -1;
-}
+    struct node_s *prev; // Указатель на предыдущий элемент стека
+    unsigned int size;   // Размер данных в узле
+    char data[];         // Гибкий массив для хранения данных
+} node_t;
 
-void stack_free(const hstack_t hstack)
+// Запись в таблице стеков
+typedef struct stack_entry_s
 {
-    UNUSED(hstack);
-}
+    int reserved;  // Флаг занятости слота (1 - занят, 0 - свободен)
+    node_t *stack; // Указатель на вершину стека
+} stack_entry_t;
 
-int stack_valid_handler(const hstack_t hstack)
+// Глобальная таблица стеков
+static struct
 {
-    UNUSED(hstack);
-    return 1;
-}
-
-unsigned int stack_size(const hstack_t hstack)
-{
-    UNUSED(hstack);
-    return 0;
-}
-
-void stack_push(const hstack_t hstack, const void* data_in, const unsigned int size)
-{
-    UNUSED(hstack);
-    UNUSED(data_in);
-    UNUSED(size);
-}
-
-unsigned int stack_pop(const hstack_t hstack, void* data_out, const unsigned int size)
-{
-    UNUSED(hstack);
-    UNUSED(data_out);
-    UNUSED(size);
-    return 0;
-}
-
+    unsigned int size;      // Текущий размер таблицы
+    stack_entry_t *entries; // Динамический массив записей
+} g_table = {0, NULL};
