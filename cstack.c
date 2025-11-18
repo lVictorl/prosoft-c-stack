@@ -51,6 +51,13 @@ static int extend_table(void)
 // Создание нового стека
 hstack_t stack_new(void)
 {
+    if (g_table.size == 0)
+    {
+        if (!extend_table())
+        {
+            return -1;
+        }
+    }
     // Поиск первого свободного слота в таблице
     for (unsigned int i = 0; i < g_table.size; i++)
     {
@@ -142,19 +149,20 @@ unsigned int stack_pop(const hstack_t stack, void *data_out, const unsigned int 
     node_t *top = g_table.entries[stack].stack;
 
     // Определение размера копируемых данных (минимум из доступного и запрошенного)
-    unsigned int copy_size = (size < top->size) ? size : top->size;
+    unsigned int copied_size = 0;
 
     // Копирование данных в буфер, если он предоставлен
-    if (data_out != NULL && copy_size > 0)
+    if (data_out != NULL && size >= top->size)
     {
-        memcpy(data_out, top->data, copy_size);
+        memcpy(data_out, top->data, top->size);
+        copied_size = top->size;
     }
 
     // Обновление вершины стека и освобождение памяти
     g_table.entries[stack].stack = top->prev;
     free(top);
 
-    return copy_size;
+    return copied_size;
 }
 
 // Освобождение стека и связанной с ним памяти
